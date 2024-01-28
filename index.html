@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"> 
+    <title>Document</title> 
+    <!-- stylesheet/js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    screens: {
+                        'xs': {'max': '639px'}
+                    }
+                },
+            }
+        }
+    </script>
+</head>
+
+<body> 
+    <div class="w-full p-32 xs:p-10 xs:mt-12">
+        <div class="">
+            <label for="dropzone-file" class="block mb-4 text-2xl font-medium text-gray-900 dark:text-white" id="dropzone">Image</label>
+        </div>
+        <form id="myForm" method="post" action="" enctype="multipart/form-data">
+            <div class="flex flex-col justify-center items-center w-full bg-gray-50 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 h-80">
+                <label for="dropzone-file" class="flex flex-col justify-center items-center w-full h-64" id="dropzone-label">
+                    <div class="flex flex-col justify-center items-center pt-5 pb-6" id="image-preview">
+                        <svg aria-hidden="true" class="mb-3 w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                        <p class="mb-4 text-xs text-gray-500 dark:text-gray-400">Max. File Size: 10MB</p>
+                        <button type="button" id="upload-button-1" class="px-5 py-2.5 text-sm font-medium text-white bg-zinc-700 rounded-lg hover:bg-zinc-800 focus:outline-none dark:bg-zinc-600 dark:hover:bg-zinc-700">Upload</button>
+                    </div>
+                    <input id="dropzone-file" type="file" class="hidden" name="image">
+                </label>
+                <button type="button" id="upload-button-2" class="hidden mb-6 px-5 py-2.5 text-sm font-medium text-white bg-zinc-700 rounded-lg hover:bg-zinc-800 focus:outline-none dark:bg-zinc-600 dark:hover:bg-zinc-700">Change</button>
+            </div>  
+        </form>              
+    </div> 
+</body>
+
+<!-- UPLOAD IMAGE, DRAG AND DROP -->
+<script type="text/javascript">
+    $(document).ready(function () {
+        let finalfd = new FormData();
+        
+        //UPLOAD IMAGE
+        document.getElementById("upload-button-1").addEventListener("click", function (event) {
+            document.getElementById('dropzone-file').click();
+        });
+        document.getElementById("upload-button-2").addEventListener("click", function (event) {
+            document.getElementById('dropzone-file').click();
+        });
+
+        var form_data = new FormData($("#myForm")[0]);
+        const uploadInput = document.getElementById('image');
+        const imagePreview = document.getElementById('image-preview');
+        let isEventListenerAdded = false;
+        $('input[name=\'image\']').on('change', function() {
+            if ($('input[name=\'image\']').val() != '') {
+                var selectedfiles = document.getElementById('dropzone-file').files;
+                if(selectedfiles.length > 1){
+                    printErrorMsg({'message': "Error! Please upload one image only."});
+                }
+                else{
+                    form_data.set("image", document.getElementById('dropzone-file').files[0]);
+                    finalfd = form_data;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        imagePreview.innerHTML =
+                        `<img src="${e.target.result}" class="max-h-48 rounded-lg mx-auto" alt="Image preview" />`;
+                        imagePreview.classList.remove('pt-5', 'pb-6');
+
+                        // Add event listener for image preview only once
+                        if (!isEventListenerAdded) {
+                            imagePreview.addEventListener('click', () => {
+                                uploadInput.click();
+                            });
+
+                            isEventListenerAdded = true;
+                        }
+                    };
+                    reader.readAsDataURL(document.getElementById('dropzone-file').files[0]);
+                    if (!isEventListenerAdded) {
+                        imagePreview.addEventListener('click', () => {
+                            uploadInput.click();
+                        });
+
+                        isEventListenerAdded = true;
+                    }
+                    var uploadbutton2 = document.getElementById('upload-button-2');
+                    uploadbutton2.classList.remove('hidden');
+                }
+            }
+        });
+        //UPLOAD IMAGE
+
+
+        //DRAG AND DROP
+        const dropZone = document.getElementById('dropzone-label');
+        dropZone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+        });
+        dropZone.addEventListener('dragleave', function () {
+        });
+        dropZone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            var dropfile = e.dataTransfer.files[0];
+            dropfiles(dropfile);
+        });
+
+        function dropfiles(file){
+            // // Append the file input to the form
+            form_data.set('image', file);
+            finalfd = form_data;
+
+            const dfreader = new FileReader();
+            dfreader.onload = (e) => {
+                imagePreview.innerHTML =
+                `<img src="${e.target.result}" class="max-h-48 rounded-lg mx-auto" alt="Image preview" />`;
+                imagePreview.classList.remove('pt-5', 'pb-6');
+
+                // Add event listener for image preview only once
+                if (!isEventListenerAdded) {
+                    imagePreview.addEventListener('click', () => {
+                        uploadInput.click();
+                    });
+
+                    isEventListenerAdded = true;
+                }
+            };
+            dfreader.readAsDataURL(file);
+            if (!isEventListenerAdded) {
+                imagePreview.addEventListener('click', () => {
+                    uploadInput.click();
+                });
+
+                isEventListenerAdded = true;
+            }
+            var uploadbutton2 = document.getElementById('upload-button-2');
+            uploadbutton2.classList.remove('hidden');
+        }
+        //DRAG AND DROP
+    });
+</script>
+<!-- UPLOAD IMAGE, DRAG AND DROP -->
+</html>
